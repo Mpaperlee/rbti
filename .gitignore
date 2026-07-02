@@ -1,0 +1,10 @@
+# OS / 编辑器杂项
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Node 工具链（如果以后引入）
+node_modules/
+npm-debug.log*
