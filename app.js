@@ -1,7 +1,9 @@
 // ============================================================
 // 科研人格测试 · 交互逻辑
 // ============================================================
-import { DIMENSIONS, QUESTIONS, TYPES } from './data.js';
+import { DIMENSIONS, QUESTIONS, TYPES, SCALE } from './data.js';
+
+const MID_LEVEL = Math.floor(SCALE.length / 2); // 中立档索引
 
 // 每条轴的「先手」字母（并列时的默认倾向）
 const AXIS_ORDER = DIMENSIONS.map((d) => Object.keys(d.poles));
@@ -15,14 +17,18 @@ function setState(patch) {
   render();
 }
 
-// ---------- 计分 ----------
+// ---------- 计分（加权累计） ----------
+// answers[j] 为该题选择的量表档位索引（0..SCALE.length-1）
 function computeCode(answers) {
-  const tally = {};
-  answers.forEach((p) => { tally[p] = (tally[p] || 0) + 1; });
+  const score = {};
+  answers.forEach((lvl, j) => {
+    const q = QUESTIONS[j];
+    const s = SCALE[lvl] || SCALE[MID_LEVEL];
+    score[q.a.pole] = (score[q.a.pole] || 0) + s.wa;
+    score[q.b.pole] = (score[q.b.pole] || 0) + s.wb;
+  });
   return AXIS_ORDER.map(([first, second]) => {
-    const a = tally[first] || 0;
-    const b = tally[second] || 0;
-    return b > a ? second : first; // 并列取先手
+    return (score[second] || 0) > (score[first] || 0) ? second : first; // 并列取先手
   }).join('');
 }
 
@@ -112,6 +118,11 @@ function viewQuestion() {
   const i = state.step;
   const q = QUESTIONS[i];
   const pct = Math.round((i / QUESTIONS.length) * 100);
+  const scaleDots = SCALE.map((s, idx) => {
+    const hint = idx < MID_LEVEL ? '更像上句' : idx > MID_LEVEL ? '更像下句' : '都有点 / 中立';
+    return `<button class="scale-dot lvl-${idx} side-${s.side}" data-act="answer" data-level="${idx}"
+      aria-label="${esc(s.label)}（${hint}）" title="${esc(s.label)}·${hint}"><span></span></button>`;
+  }).join('');
   return `<section class="card screen">
     <div class="q-top">
       <button class="q-back" data-act="back" ${i === 0 ? 'disabled' : ''} aria-label="上一题">‹</button>
@@ -122,10 +133,16 @@ function viewQuestion() {
     </div>
     <div class="question">
       <h2>${esc(q.q)}</h2>
-      <div class="options">
-        <button class="option" data-act="answer" data-pole="${q.a.pole}"><span class="dot"></span><span>${esc(q.a.text)}</span></button>
-        <button class="option" data-act="answer" data-pole="${q.b.pole}"><span class="dot"></span><span>${esc(q.b.text)}</span></button>
+      <div class="spectrum">
+        <div class="stmt stmt-a">${esc(q.a.text)}</div>
+        <div class="scale">
+          <span class="scale-end">↑ 上句</span>
+          <div class="scale-dots">${scaleDots}</div>
+          <span class="scale-end">下句 ↓</span>
+        </div>
+        <div class="stmt stmt-b">${esc(q.b.text)}</div>
       </div>
+      <p class="scale-hint">点一个最接近你的位置：越靠上句 / 下句 = 越像那句，中间表示都有点</p>
     </div>
   </section>`;
 }
@@ -217,7 +234,8 @@ APP.addEventListener('click', async (e) => {
   if (act === 'start') {
     setState({ view: 'question', step: 0, answers: [] });
   } else if (act === 'answer') {
-    const answers = [...state.answers.slice(0, state.step), el.dataset.pole];
+    const level = Number(el.dataset.level);
+    const answers = [...state.answers.slice(0, state.step), level];
     const next = state.step + 1;
     if (next >= QUESTIONS.length) {
       const code = computeCode(answers);
