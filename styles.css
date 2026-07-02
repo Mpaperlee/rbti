@@ -153,41 +153,58 @@ body {
   transition: width 0.4s var(--ease);
 }
 
-.question { margin-top: 22px; }
+.question { margin-top: 18px; }
 .question h2 {
-  font-size: clamp(21px, 5.5vw, 25px); line-height: 1.4; letter-spacing: -0.3px; margin-bottom: 22px;
+  font-size: clamp(20px, 5vw, 24px); line-height: 1.35; letter-spacing: -0.3px; margin-bottom: 16px;
 }
-/* 5 档量表：上句 / 刻度 / 下句 */
-.spectrum { display: flex; flex-direction: column; gap: 12px; }
-.stmt {
-  border-radius: var(--r-md); padding: 16px 18px; font-size: 16px; font-weight: 700;
-  line-height: 1.5; color: var(--ink);
-}
-.stmt-a { background: #f4f1ff; border: 2.5px solid #e2daff; }
-.stmt-b { background: #fff0f5; border: 2.5px solid #ffdbe7; }
 
-.scale { display: flex; align-items: center; gap: 8px; padding: 2px 2px; }
-.scale-end { flex: none; width: 42px; text-align: center; font-size: 12px; font-weight: 800; color: var(--ink-soft); }
-.scale-dots { flex: 1; display: flex; justify-content: space-between; align-items: center; }
+/* 小屏进一步收紧，避免答题页需要滚动 */
+@media (max-width: 430px) {
+  .card { padding: 22px 18px; }
+  .question { margin-top: 14px; }
+  .question h2 { font-size: 19.5px; margin-bottom: 13px; }
+  .stmt { font-size: 14.5px; padding: 11px 13px; line-height: 1.4; }
+  .spectrum { gap: 8px; }
+}
+/* 7 档量表：上句 / 刻度 / 下句（紧凑，移动优先） */
+.spectrum { display: flex; flex-direction: column; gap: 9px; }
+.stmt {
+  border-radius: 16px; padding: 12px 15px; font-size: 15px; font-weight: 700;
+  line-height: 1.45; color: var(--ink);
+}
+.stmt-tag {
+  display: inline-block; font-size: 11px; font-weight: 900; color: #fff;
+  padding: 2px 9px; border-radius: 8px; margin-right: 8px; vertical-align: 2px;
+}
+.stmt-a { background: #f4f1ff; border: 2px solid #e2daff; }
+.stmt-b { background: #fff0f5; border: 2px solid #ffdbe7; }
+.stmt-a .stmt-tag { background: var(--accent); }
+.stmt-b .stmt-tag { background: var(--accent-2); }
+
+.scale { padding: 4px 2px 2px; }
+.scale-dots { display: flex; align-items: center; }
 .scale-dot {
-  border: none; background: transparent; cursor: pointer; padding: 8px 4px;
-  display: grid; place-items: center; -webkit-tap-highlight-color: transparent;
+  flex: 1 1 0; border: none; background: transparent; cursor: pointer;
+  padding: 9px 0; display: grid; place-items: center; -webkit-tap-highlight-color: transparent;
 }
 .scale-dot span {
   display: block; border-radius: 50%; border: 3px solid; background: transparent;
   transition: transform 0.15s var(--ease), background 0.15s, box-shadow 0.15s;
 }
-/* 圆点尺寸由 JS 内联设置（按距中心的距离），与档数无关 */
+/* 圆点尺寸由 JS 内联设置（按距中心的距离），与档数无关；.scale-dot 等分保证间距均匀 */
 .side-a span { border-color: #b9a6ff; }
 .side-b span { border-color: #ff9dbb; }
 .side-mid span { border-color: #cfc6ee; }
 .scale-dot:hover span { transform: scale(1.18); }
-.side-a:hover span { background: var(--accent); box-shadow: 0 0 0 5px #ece6ff; }
-.side-b:hover span { background: var(--accent-2); box-shadow: 0 0 0 5px #ffe2ec; }
-.side-mid:hover span { background: #a99fd0; box-shadow: 0 0 0 5px #eee9fb; }
+.side-a:hover span, .side-a:active span { background: var(--accent); box-shadow: 0 0 0 5px #ece6ff; }
+.side-b:hover span, .side-b:active span { background: var(--accent-2); box-shadow: 0 0 0 5px #ffe2ec; }
+.side-mid:hover span, .side-mid:active span { background: #a99fd0; box-shadow: 0 0 0 5px #eee9fb; }
 .scale-dot:active span { transform: scale(0.94); }
 
-.scale-hint { text-align: center; font-size: 12.5px; color: var(--ink-soft); margin-top: 16px; line-height: 1.5; }
+.scale-ends {
+  display: flex; justify-content: space-between; padding: 0 2px; margin-top: 2px;
+  font-size: 11.5px; font-weight: 800; color: var(--ink-soft);
+}
 
 /* ---------- 结果页 ---------- */
 .result-card {

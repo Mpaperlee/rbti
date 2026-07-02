@@ -145,7 +145,7 @@ function viewQuestion() {
   const pct = Math.round((i / QUESTIONS.length) * 100);
   const scaleDots = SCALE.map((s, idx) => {
     const hint = idx < MID_LEVEL ? '更像上句' : idx > MID_LEVEL ? '更像下句' : '都有点 / 中立';
-    const size = 16 + Math.abs(idx - MID_LEVEL) * 7; // 越靠两端越大，档数无关
+    const size = 13 + Math.abs(idx - MID_LEVEL) * 5; // 越靠两端越大，档数无关
     return `<button class="scale-dot side-${s.side}" data-act="answer" data-level="${idx}"
       aria-label="${esc(s.label)}（${hint}）" title="${esc(s.label)}·${hint}"><span style="width:${size}px;height:${size}px"></span></button>`;
   }).join('');
@@ -160,15 +160,13 @@ function viewQuestion() {
     <div class="question">
       <h2>${esc(q.q)}</h2>
       <div class="spectrum">
-        <div class="stmt stmt-a">${esc(q.a.text)}</div>
+        <div class="stmt stmt-a"><span class="stmt-tag">上句</span>${esc(q.a.text)}</div>
         <div class="scale">
-          <span class="scale-end">↑ 上句</span>
           <div class="scale-dots">${scaleDots}</div>
-          <span class="scale-end">下句 ↓</span>
+          <div class="scale-ends"><span>← 更像上句</span><span>更像下句 →</span></div>
         </div>
-        <div class="stmt stmt-b">${esc(q.b.text)}</div>
+        <div class="stmt stmt-b"><span class="stmt-tag">下句</span>${esc(q.b.text)}</div>
       </div>
-      <p class="scale-hint">点一个最接近你的位置：越靠上句 / 下句 = 越像那句，中间表示都有点</p>
     </div>
   </section>`;
 }
