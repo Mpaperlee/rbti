@@ -32,21 +32,26 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-html, body { height: 100%; }
+html { -webkit-text-size-adjust: 100%; }
 
 body {
   font-family: var(--font);
   color: var(--ink);
-  background:
-    radial-gradient(120% 80% at 15% 0%, var(--bg-2) 0%, transparent 55%),
-    radial-gradient(120% 80% at 90% 10%, var(--bg-3) 0%, transparent 50%),
-    var(--bg-1);
-  background-attachment: fixed;
-  min-height: 100dvh;
+  background: var(--bg-1);
+  min-height: 100vh;
+  min-height: 100dvh; /* 不锁死高度：内容超出时页面可正常滚动（修复微信 X5 无法滚动） */
   display: flex;
   justify-content: center;
   padding: 20px 16px 40px;
   -webkit-font-smoothing: antialiased;
+}
+/* 固定渐变背景层：避免移动端 background-attachment:fixed 的兼容问题，长页面滚动时背景也始终铺满 */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(120% 80% at 15% 0%, var(--bg-2) 0%, transparent 55%),
+    radial-gradient(120% 80% at 90% 10%, var(--bg-3) 0%, transparent 50%),
+    var(--bg-1);
 }
 
 /* 漂浮的表情装饰 */
@@ -185,7 +190,7 @@ body {
 .scale-dots { display: flex; align-items: center; }
 .scale-dot {
   flex: 1 1 0; border: none; background: transparent; cursor: pointer;
-  padding: 9px 0; display: grid; place-items: center; -webkit-tap-highlight-color: transparent;
+  padding: 13px 0; display: grid; place-items: center; -webkit-tap-highlight-color: transparent;
 }
 .scale-dot span {
   display: block; border-radius: 50%; border: 3px solid; background: transparent;
@@ -200,6 +205,13 @@ body {
 .side-b:hover span, .side-b:active span { background: var(--accent-2); box-shadow: 0 0 0 5px #ffe2ec; }
 .side-mid:hover span, .side-mid:active span { background: #a99fd0; box-shadow: 0 0 0 5px #eee9fb; }
 .scale-dot:active span { transform: scale(0.94); }
+
+/* 点击后的可见反馈：选中的圈填充放大、其余淡出，停顿后再翻页 */
+.scale-dots.locked .scale-dot:not(.picked) span { opacity: 0.28; }
+.scale-dot.picked span { transform: scale(1.3); }
+.side-a.picked span { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 6px #ece6ff; }
+.side-b.picked span { background: var(--accent-2); border-color: var(--accent-2); box-shadow: 0 0 0 6px #ffe2ec; }
+.side-mid.picked span { background: #a99fd0; border-color: #a99fd0; box-shadow: 0 0 0 6px #eee9fb; }
 
 .scale-ends {
   display: flex; justify-content: space-between; padding: 0 2px; margin-top: 2px;

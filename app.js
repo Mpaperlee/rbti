@@ -145,7 +145,7 @@ function viewQuestion() {
   const pct = Math.round((i / QUESTIONS.length) * 100);
   const scaleDots = SCALE.map((s, idx) => {
     const hint = idx < MID_LEVEL ? '更像上句' : idx > MID_LEVEL ? '更像下句' : '都有点 / 中立';
-    const size = 13 + Math.abs(idx - MID_LEVEL) * 5; // 越靠两端越大，档数无关
+    const size = 15 + Math.abs(idx - MID_LEVEL) * 5; // 越靠两端越大，档数无关
     return `<button class="scale-dot side-${s.side}" data-act="answer" data-level="${idx}"
       aria-label="${esc(s.label)}（${hint}）" title="${esc(s.label)}·${hint}"><span style="width:${size}px;height:${size}px"></span></button>`;
   }).join('');
@@ -270,17 +270,27 @@ APP.addEventListener('click', async (e) => {
   if (act === 'start') {
     setState({ view: 'question', step: 0, answers: [] });
   } else if (act === 'answer') {
+    if (state.locked) return; // 防连点、防在反馈动画期间重复触发
     const level = Number(el.dataset.level);
-    const answers = [...state.answers.slice(0, state.step), level];
-    const next = state.step + 1;
-    if (next >= QUESTIONS.length) {
-      const code = computeCode(answers);
-      history.replaceState(null, '', shareUrl(code));
-      setState({ view: 'result', code, answers });
-    } else {
-      setState({ answers, step: next });
-    }
+    const stepAtClick = state.step;
+    // 先给出可见反馈：选中的圈填充放大，其余淡出，停顿一下再翻页
+    el.classList.add('picked');
+    const dots = el.closest('.scale-dots');
+    if (dots) dots.classList.add('locked');
+    state = { ...state, locked: true };
+    setTimeout(() => {
+      const answers = [...state.answers.slice(0, stepAtClick), level];
+      const next = stepAtClick + 1;
+      if (next >= QUESTIONS.length) {
+        const code = computeCode(answers);
+        history.replaceState(null, '', shareUrl(code));
+        setState({ view: 'result', code, answers, locked: false });
+      } else {
+        setState({ answers, step: next, locked: false });
+      }
+    }, 340);
   } else if (act === 'back') {
+    if (state.locked) return;
     if (state.step > 0) setState({ step: state.step - 1 });
   } else if (act === 'retry') {
     history.replaceState(null, '', shareUrl(null));
