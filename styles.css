@@ -177,9 +177,7 @@ body {
   display: block; border-radius: 50%; border: 3px solid; background: transparent;
   transition: transform 0.15s var(--ease), background 0.15s, box-shadow 0.15s;
 }
-.lvl-0 span, .lvl-4 span { width: 32px; height: 32px; }
-.lvl-1 span, .lvl-3 span { width: 25px; height: 25px; }
-.lvl-2 span { width: 19px; height: 19px; }
+/* 圆点尺寸由 JS 内联设置（按距中心的距离），与档数无关 */
 .side-a span { border-color: #b9a6ff; }
 .side-b span { border-color: #ff9dbb; }
 .side-mid span { border-color: #cfc6ee; }
@@ -227,6 +225,21 @@ body {
 }
 .chip .chip-letter { font-size: 26px; font-weight: 900; color: var(--ink); line-height: 1; }
 .chip .chip-name { font-size: 11.5px; font-weight: 800; color: var(--ink-soft); margin-top: 4px; }
+
+/* 维度占比条 */
+.dim-bars { display: flex; flex-direction: column; gap: 12px; margin-top: 18px; }
+.dim-bar-head { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+.dim-bar-head .pole { color: var(--ink-soft); }
+.dim-bar-head .pole.win { color: var(--ink); font-weight: 900; }
+.dim-track {
+  height: 12px; border-radius: 999px; overflow: hidden;
+  background: #ff9dbb33; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.5);
+}
+.dim-fill {
+  height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), #b9a6ff);
+  transition: width 0.6s var(--ease);
+}
 
 .result-desc {
   background: rgba(255,255,255,0.7); border-radius: var(--r-md); padding: 18px 18px;

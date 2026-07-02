@@ -32,6 +32,31 @@ function computeCode(answers) {
   }).join('');
 }
 
+// 每条轴的两极得分与百分比（用于结果页的维度占比条）
+// 仅在用户本次真实答完题时可算；分享链接(?r=)打开时无 answers，返回 null
+function computeScores(answers) {
+  if (!Array.isArray(answers) || answers.length !== QUESTIONS.length) return null;
+  const score = {};
+  answers.forEach((lvl, j) => {
+    const q = QUESTIONS[j];
+    const s = SCALE[lvl] || SCALE[MID_LEVEL];
+    score[q.a.pole] = (score[q.a.pole] || 0) + s.wa;
+    score[q.b.pole] = (score[q.b.pole] || 0) + s.wb;
+  });
+  return AXIS_ORDER.map(([first, second]) => {
+    const f = score[first] || 0;
+    const s = score[second] || 0;
+    const total = f + s || 1;
+    const firstPct = Math.round((f / total) * 100);
+    const winner = s > f ? second : first;
+    return {
+      first, second,
+      firstMeta: letterMeta(first), secondMeta: letterMeta(second),
+      firstPct, secondPct: 100 - firstPct, winner,
+    };
+  });
+}
+
 function letterMeta(letter) {
   for (const dim of DIMENSIONS) {
     if (dim.poles[letter]) return dim.poles[letter];
@@ -120,8 +145,9 @@ function viewQuestion() {
   const pct = Math.round((i / QUESTIONS.length) * 100);
   const scaleDots = SCALE.map((s, idx) => {
     const hint = idx < MID_LEVEL ? '更像上句' : idx > MID_LEVEL ? '更像下句' : '都有点 / 中立';
-    return `<button class="scale-dot lvl-${idx} side-${s.side}" data-act="answer" data-level="${idx}"
-      aria-label="${esc(s.label)}（${hint}）" title="${esc(s.label)}·${hint}"><span></span></button>`;
+    const size = 16 + Math.abs(idx - MID_LEVEL) * 7; // 越靠两端越大，档数无关
+    return `<button class="scale-dot side-${s.side}" data-act="answer" data-level="${idx}"
+      aria-label="${esc(s.label)}（${hint}）" title="${esc(s.label)}·${hint}"><span style="width:${size}px;height:${size}px"></span></button>`;
   }).join('');
   return `<section class="card screen">
     <div class="q-top">
@@ -156,6 +182,17 @@ function viewResult(code) {
   }).join('');
   const cp = TYPES[t.match];
   const rare = isRareType(code);
+  const scores = computeScores(state.answers);
+  const bars = scores ? `<div class="dim-bars">${scores.map((ax) => {
+    const wf = ax.winner === ax.first;
+    return `<div class="dim-bar">
+      <div class="dim-bar-head">
+        <span class="pole${wf ? ' win' : ''}">${ax.firstMeta.emoji} ${esc(ax.firstMeta.name)} ${ax.firstPct}%</span>
+        <span class="pole${!wf ? ' win' : ''}">${ax.secondPct}% ${esc(ax.secondMeta.name)} ${ax.secondMeta.emoji}</span>
+      </div>
+      <div class="dim-track"><div class="dim-fill" style="width:${ax.firstPct}%"></div></div>
+    </div>`;
+  }).join('')}</div>` : '';
 
   return `<section class="card result-card screen${rare ? ' is-rare' : ''}" style="--card-tint:${t.color}22" id="resultCard">
     ${rare ? '<div class="rare-ribbon">✨ 隐藏款 ✨</div>' : ''}
@@ -165,6 +202,7 @@ function viewResult(code) {
       <div class="result-name">${esc(t.name)}</div>
       <div class="result-tagline">「${esc(t.tagline)}」</div>
       <div class="code-chips">${chips}</div>
+      ${bars}
       <div class="result-desc">${esc(t.desc)}</div>
       <div class="result-lines">
         ${rare ? '<div class="rl rl-rare"><b>🎲 稀有度</b><span>反差隐藏款！驱动力和产出方向相反，现实中不多见，抽到算你欧 🍀</span></div>' : ''}

@@ -48,11 +48,13 @@ export const DIMENSIONS = [
 // wa / wb = 该档分别投给 a 极 / b 极的权重；越偏哪句，那一极得分越高，中间可保持中立
 // 计分改为加权累计（不再是简单二选一计票），更能反映真实倾向、也降低单题翻轴的敏感度
 export const SCALE = [
-  { label: '非常像', side: 'a', wa: 4, wb: 0 },
-  { label: '有点像', side: 'a', wa: 3, wb: 1 },
-  { label: '都有点 / 不好说', side: 'mid', wa: 2, wb: 2 },
-  { label: '有点像', side: 'b', wa: 1, wb: 3 },
-  { label: '非常像', side: 'b', wa: 0, wb: 4 },
+  { label: '非常像', side: 'a', wa: 6, wb: 0 },
+  { label: '挺像', side: 'a', wa: 5, wb: 1 },
+  { label: '有点像', side: 'a', wa: 4, wb: 2 },
+  { label: '都有点 / 不好说', side: 'mid', wa: 3, wb: 3 },
+  { label: '有点像', side: 'b', wa: 2, wb: 4 },
+  { label: '挺像', side: 'b', wa: 1, wb: 5 },
+  { label: '非常像', side: 'b', wa: 0, wb: 6 },
 ];
 
 // 16 道题：P/S 5 题、G/C 3 题、E/L 3 题、D/Q 5 题（弱轴加题、均为奇数避免平票），交错排列
